@@ -25,7 +25,7 @@ configure_and_build() {
     -G "$GENERATOR" \
     -DBUILD_UNITTESTS=OFF \
     -DBUILD_SHELL=OFF \
-    -DBUILD_EXTENSIONS=icu;json;parquet;vss;sqlite_scanner \
+    -DBUILD_EXTENSIONS="icu;json;parquet;vss;sqlite_scanner" \
     -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
     -DCMAKE_OSX_ARCHITECTURES="$arch" \
     -DCMAKE_OSX_SYSROOT="$sdk" \
