@@ -16,6 +16,8 @@ jobs:
       ANDROID_PLATFORM: android-28
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Check toolchain versions
         run: |
