@@ -1,0 +1,2 @@
+# Tauri Plugin duckdb
+

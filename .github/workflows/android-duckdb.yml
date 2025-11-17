@@ -1,0 +1,48 @@
+name: Build DuckDB Android Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'third_party/duckdb/**'
+      - 'scripts/ci/**'
+      - '.github/workflows/android-duckdb.yml'
+
+jobs:
+  android:
+    runs-on: macos-13
+    env:
+      ANDROID_PLATFORM: android-28
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install prerequisites
+        run: |
+          brew update
+          brew install ninja cmake || true
+
+      - name: Install Android SDK + NDK (r28)
+        uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platform-tools
+            build-tools;35.0.0
+            platforms;android-34
+            ndk;28.0.12674087
+
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "$HOME/vcpkg"
+          "$HOME/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Build DuckDB for Android ABIs
+        run: |
+          chmod +x scripts/ci/build-android-duckdb.sh
+          scripts/ci/build-android-duckdb.sh
+
+      - name: Archive libduckdb artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: duckdb-android-libs
+          path: android/src/main/jniLibs
