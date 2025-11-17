@@ -3,6 +3,7 @@ set -euo pipefail
 
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 DUCKDB_DIR="$REPO_ROOT/third_party/duckdb"
+PREP_SCRIPT="$REPO_ROOT/scripts/ci/prep.sh"
 ANDROID_OUTPUT_DIR="$REPO_ROOT/android/src/main/jniLibs"
 ANDROID_ABIS=("arm64-v8a" "armeabi-v7a" "x86_64")
 
@@ -35,7 +36,7 @@ for abi in "${ANDROID_ABIS[@]}"; do
   esac
   export VCPKG_DEFAULT_TRIPLET="$VCPKG_TARGET_TRIPLET"
 
-  (cd "$DUCKDB_DIR" && bash ./prep.sh)
+  DUCKDB_DIR="$DUCKDB_DIR" bash "$PREP_SCRIPT"
 
   SOURCE_LIB="$DUCKDB_DIR/build/android_${abi}/src/libduckdb.so"
   TARGET_DIR="$ANDROID_OUTPUT_DIR/$abi"
