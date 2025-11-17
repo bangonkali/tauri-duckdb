@@ -1,0 +1,41 @@
+name: Build DuckDB iOS Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'third_party/duckdb/**'
+      - 'scripts/ci/build-ios-duckdb.sh'
+      - '.github/workflows/ios-duckdb.yml'
+
+jobs:
+  ios:
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Print tool versions
+        run: |
+          sw_vers
+          xcodebuild -version
+          cmake --version || true
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install cmake ninja || true
+
+      - name: Build DuckDB iOS libraries
+        run: |
+          chmod +x scripts/ci/build-ios-duckdb.sh
+          scripts/ci/build-ios-duckdb.sh
+
+      - name: Archive libduckdb artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: duckdb-ios-libs
+          path: ios/libduckdb

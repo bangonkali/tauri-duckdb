@@ -1,0 +1,95 @@
+name: Release Native Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-14
+    env:
+      ANDROID_PLATFORM: android-28
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Tool versions
+        run: |
+          sw_vers
+          xcodebuild -version
+          rustc --version || true
+          cmake --version || true
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin, x86_64-apple-darwin
+
+      - name: Install brew dependencies
+        run: |
+          brew update
+          brew install cmake ninja || true
+
+      - name: Install Android SDK + NDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android licenses and install packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager --install \
+            "platform-tools" \
+            "build-tools;35.0.0" \
+            "platforms;android-34" \
+            "ndk;28.0.12674087"
+
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "$HOME/vcpkg"
+          "$HOME/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Build DuckDB Android ABIs
+        run: |
+          chmod +x scripts/ci/build-android-duckdb.sh
+          scripts/ci/build-android-duckdb.sh
+
+      - name: Build DuckDB iOS libraries
+        run: |
+          chmod +x scripts/ci/build-ios-duckdb.sh
+          scripts/ci/build-ios-duckdb.sh
+
+      - name: Build macOS plugin libraries
+        run: |
+          cargo build --release --target aarch64-apple-darwin
+          cargo build --release --target x86_64-apple-darwin
+
+      - name: Stage release artifacts
+        run: |
+          ARTIFACT_DIR=release-artifacts
+          mkdir -p "$ARTIFACT_DIR"
+
+          tar -czf "$ARTIFACT_DIR/android-jniLibs.tar.gz" -C android/src/main jniLibs
+          tar -czf "$ARTIFACT_DIR/ios-libduckdb.tar.gz" -C ios libduckdb
+
+          mkdir -p "$ARTIFACT_DIR/rust-libs"
+          cp target/aarch64-apple-darwin/release/libtauri_plugin_duckdb.a "$ARTIFACT_DIR/rust-libs/libtauri_plugin_duckdb-aarch64-apple-darwin.a"
+          cp target/x86_64-apple-darwin/release/libtauri_plugin_duckdb.a "$ARTIFACT_DIR/rust-libs/libtauri_plugin_duckdb-x86_64-apple-darwin.a"
+          if [[ -f resources/duckdb/seed.db ]]; then
+            cp resources/duckdb/seed.db "$ARTIFACT_DIR/seed.db"
+          fi
+          tar -czf "$ARTIFACT_DIR/rust-libs.tar.gz" -C "$ARTIFACT_DIR" rust-libs
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauri-duckdb-release
+          path: release-artifacts/*.tar.gz
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/*.tar.gz
