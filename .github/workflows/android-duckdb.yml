@@ -20,10 +20,15 @@ on:
       - 'guest-js/**'
       - '.github/workflows/android-duckdb.yml'
 
+permissions:
+  contents: read
+
 jobs:
   build-duckdb-android:
     name: Build DuckDB Android Libraries
     runs-on: macos-13
+    permissions:
+      contents: read
     env:
       ANDROID_PLATFORM: android-28
     steps:
@@ -70,6 +75,8 @@ jobs:
     name: Build Android Demo App
     needs: build-duckdb-android
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
