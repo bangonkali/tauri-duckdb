@@ -1,4 +1,4 @@
-name: Build DuckDB Android Artifacts
+name: Build Android DuckDB Plugin and Demo App
 
 on:
   workflow_dispatch:
@@ -7,15 +7,28 @@ on:
     paths:
       - 'third_party/duckdb/**'
       - 'scripts/ci/**'
+      - 'examples/tauri-app/**'
+      - 'src/**'
+      - 'guest-js/**'
+      - '.github/workflows/android-duckdb.yml'
+  pull_request:
+    paths:
+      - 'third_party/duckdb/**'
+      - 'scripts/ci/**'
+      - 'examples/tauri-app/**'
+      - 'src/**'
+      - 'guest-js/**'
       - '.github/workflows/android-duckdb.yml'
 
 jobs:
-  android:
+  build-duckdb-android:
+    name: Build DuckDB Android Libraries
     runs-on: macos-13
     env:
       ANDROID_PLATFORM: android-28
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -51,3 +64,123 @@ jobs:
         with:
           name: duckdb-android-libs
           path: android/src/main/jniLibs
+          retention-days: 7
+
+  build-android-app:
+    name: Build Android Demo App
+    needs: build-duckdb-android
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Rust toolchain with Android targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager --install \
+            "platform-tools" \
+            "build-tools;35.0.0" \
+            "platforms;android-34" \
+            "ndk;28.0.12674087"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download DuckDB Android libraries
+        uses: actions/download-artifact@v4
+        with:
+          name: duckdb-android-libs
+          path: android/src/main/jniLibs
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-android-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-android-
+
+      - name: Install example app dependencies
+        working-directory: examples/tauri-app
+        run: pnpm install
+
+      - name: Build example app frontend
+        working-directory: examples/tauri-app
+        run: pnpm run build
+
+      - name: Build Android APK (universal)
+        working-directory: examples/tauri-app
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.12674087
+        run: |
+          pnpm tauri android build --apk
+
+      - name: Build Android AAB
+        working-directory: examples/tauri-app
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.12674087
+        run: |
+          pnpm tauri android build --aab
+
+      - name: List build outputs
+        run: |
+          echo "=== APK Files ==="
+          find examples/tauri-app/src-tauri/gen/android/app/build/outputs/apk -name "*.apk" -type f -exec ls -lh {} \;
+          echo ""
+          echo "=== AAB Files ==="
+          find examples/tauri-app/src-tauri/gen/android/app/build/outputs/bundle -name "*.aab" -type f -exec ls -lh {} \;
+
+      - name: Upload Universal APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-universal
+          path: |
+            examples/tauri-app/src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-debug
+          path: |
+            examples/tauri-app/src-tauri/gen/android/app/build/outputs/apk/*/debug/*.apk
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: |
+            examples/tauri-app/src-tauri/gen/android/app/build/outputs/bundle/**/*.aab
+          retention-days: 30
+          if-no-files-found: warn

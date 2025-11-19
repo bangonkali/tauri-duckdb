@@ -65,29 +65,3 @@ jobs:
 
       - name: Build package
         run: pnpm run build
-
-  example:
-    name: Example App Build
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        working-directory: examples/tauri-app
-        run: pnpm install
-
-      - name: Build front-end
-        working-directory: examples/tauri-app
-        run: pnpm run build
