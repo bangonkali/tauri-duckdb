@@ -81,23 +81,27 @@ This will:
 #### Release APK (universal)
 
 ```bash
-bun tauri android build --apk
+bun tauri android build
 ```
 
 Output: `src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk`
 
 #### Release AAB (for Google Play)
 
+Note: The default build command produces APK. For AAB, you may need to use Gradle directly or configure in tauri.conf.json.
+
 ```bash
-bun tauri android build --aab
+bun tauri android build
 ```
 
-Output: `src-tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab`
+Output: Both APK and AAB may be generated in:
+- APK: `src-tauri/gen/android/app/build/outputs/apk/`
+- AAB: `src-tauri/gen/android/app/build/outputs/bundle/`
 
 #### Split APKs (by ABI)
 
 ```bash
-bun tauri android build --apk --split-per-abi
+bun tauri android build --split-per-abi
 ```
 
 This creates separate APKs for each architecture:
@@ -169,9 +173,8 @@ android {
 ### 3. Build Signed Release
 
 ```bash
-bun tauri android build --apk
-# or
-bun tauri android build --aab
+bun tauri android build
+```
 ```
 
 ## Troubleshooting
@@ -190,7 +193,7 @@ echo $NDK_HOME
 
 For APK/AAB builds, you don't need a device. Use:
 ```bash
-bun tauri android build --apk --target aarch64-linux-android
+bun tauri android build --target aarch64-linux-android
 ```
 
 ### Gradle Build Fails
@@ -200,7 +203,7 @@ Try cleaning:
 cd src-tauri/gen/android
 ./gradlew clean
 cd ../../..
-bun tauri android build --apk
+bun tauri android build
 ```
 
 ### Rust Compilation Errors

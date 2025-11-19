@@ -58,11 +58,8 @@ bun install
 # Build the frontend
 bun build
 
-# Build Android APK
-bun tauri android build --apk
-
-# Or build Android AAB
-bun tauri android build --aab
+# Build Android APK and AAB
+bun tauri android build
 ```
 
 The built files will be in:

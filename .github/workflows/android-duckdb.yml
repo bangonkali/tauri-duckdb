@@ -147,21 +147,13 @@ jobs:
         working-directory: examples/tauri-app
         run: bun run build
 
-      - name: Build Android APK (universal)
+      - name: Build Android APK and AAB
         working-directory: examples/tauri-app
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.12674087
         run: |
-          bunx tauri android build --apk
-
-      - name: Build Android AAB
-        working-directory: examples/tauri-app
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.12674087
-        run: |
-          bunx tauri android build --aab
+          bunx tauri android build
 
       - name: List build outputs
         run: |

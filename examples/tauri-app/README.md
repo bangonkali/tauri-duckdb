@@ -34,10 +34,10 @@ bun dev
 bun build
 
 # Build APK
-bun tauri android build --apk
+bun tauri android build
 
 # Build AAB for Play Store
-bun tauri android build --aab
+bun tauri android build
 ```
 
 ### Testing on Device
