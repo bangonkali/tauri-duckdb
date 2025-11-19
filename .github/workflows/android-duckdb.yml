@@ -133,6 +133,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-android-
 
+      - name: Install plugin package dependencies
+        run: bun install
+
+      - name: Build plugin package
+        run: bun run build
+
       - name: Install example app dependencies
         working-directory: examples/tauri-app
         run: bun install
