@@ -11,11 +11,11 @@ This document provides detailed instructions for setting up and building the And
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
 
-2. **Node.js** and **pnpm**
+2. **Node.js LTS** and **Bun**
    ```bash
    # Install Node.js 20.x
-   # Then install pnpm
-   npm install -g pnpm
+   # Then install Bun
+   curl -fsSL https://bun.sh/install | bash
    ```
 
 3. **Android Studio** (recommended) or Android SDK CLI tools
@@ -56,13 +56,13 @@ rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-andro
 ```bash
 git clone https://github.com/bangonkali/tauri-duckdb.git
 cd tauri-duckdb/examples/tauri-app
-pnpm install
+bun install
 ```
 
 ### 2. Build Frontend
 
 ```bash
-pnpm build
+bun build
 ```
 
 ### 3. Build Android
@@ -70,7 +70,7 @@ pnpm build
 #### Debug Build (for development)
 
 ```bash
-pnpm tauri android dev
+bun tauri android dev
 ```
 
 This will:
@@ -81,7 +81,7 @@ This will:
 #### Release APK (universal)
 
 ```bash
-pnpm tauri android build --apk
+bun tauri android build --apk
 ```
 
 Output: `src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk`
@@ -89,7 +89,7 @@ Output: `src-tauri/gen/android/app/build/outputs/apk/universal/release/app-unive
 #### Release AAB (for Google Play)
 
 ```bash
-pnpm tauri android build --aab
+bun tauri android build --aab
 ```
 
 Output: `src-tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab`
@@ -97,7 +97,7 @@ Output: `src-tauri/gen/android/app/build/outputs/bundle/universalRelease/app-uni
 #### Split APKs (by ABI)
 
 ```bash
-pnpm tauri android build --apk --split-per-abi
+bun tauri android build --apk --split-per-abi
 ```
 
 This creates separate APKs for each architecture:
@@ -169,9 +169,9 @@ android {
 ### 3. Build Signed Release
 
 ```bash
-pnpm tauri android build --apk
+bun tauri android build --apk
 # or
-pnpm tauri android build --aab
+bun tauri android build --aab
 ```
 
 ## Troubleshooting
@@ -190,7 +190,7 @@ echo $NDK_HOME
 
 For APK/AAB builds, you don't need a device. Use:
 ```bash
-pnpm tauri android build --apk --target aarch64-linux-android
+bun tauri android build --apk --target aarch64-linux-android
 ```
 
 ### Gradle Build Fails
@@ -200,7 +200,7 @@ Try cleaning:
 cd src-tauri/gen/android
 ./gradlew clean
 cd ../../..
-pnpm tauri android build --apk
+bun tauri android build --apk
 ```
 
 ### Rust Compilation Errors

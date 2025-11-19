@@ -13,7 +13,7 @@ A sample Tauri v2 mobile application demonstrating the DuckDB plugin integration
 
 ### Prerequisites
 
-- Node.js and pnpm
+- Node.js LTS and Bun
 - Rust toolchain
 - Android SDK and NDK (for Android builds)
 
@@ -21,23 +21,23 @@ A sample Tauri v2 mobile application demonstrating the DuckDB plugin integration
 
 ```sh
 # Install dependencies
-pnpm install
+bun install
 
 # Run development server
-pnpm dev
+bun dev
 ```
 
 ### Android Build
 
 ```sh
 # Build frontend
-pnpm build
+bun build
 
 # Build APK
-pnpm tauri android build --apk
+bun tauri android build --apk
 
 # Build AAB for Play Store
-pnpm tauri android build --aab
+bun tauri android build --aab
 ```
 
 ### Testing on Device
@@ -45,7 +45,7 @@ pnpm tauri android build --aab
 1. Enable "Developer Options" on your Android device
 2. Enable "USB Debugging"
 3. Connect your device via USB
-4. Run: `pnpm tauri android dev`
+4. Run: `bun tauri android dev`
 
 Or install the built APK:
 ```sh

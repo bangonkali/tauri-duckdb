@@ -29,9 +29,9 @@ The example app showcases the DuckDB plugin integration with a mobile-friendly U
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
 
-2. **Install Node.js and pnpm**
+2. **Install Node.js LTS and Bun**
    ```sh
-   npm install -g pnpm
+   curl -fsSL https://bun.sh/install | bash
    ```
 
 3. **Install Android Studio and SDK**
@@ -53,16 +53,16 @@ The example app showcases the DuckDB plugin integration with a mobile-friendly U
 cd examples/tauri-app
 
 # Install dependencies
-pnpm install
+bun install
 
 # Build the frontend
-pnpm build
+bun build
 
 # Build Android APK
-pnpm tauri android build --apk
+bun tauri android build --apk
 
 # Or build Android AAB
-pnpm tauri android build --aab
+bun tauri android build --aab
 ```
 
 The built files will be in:
@@ -108,7 +108,7 @@ console.log(result)
 
 ```sh
 cd your-app
-pnpm tauri android init
+bun tauri android init
 ```
 
 ## 🔧 Building DuckDB Libraries

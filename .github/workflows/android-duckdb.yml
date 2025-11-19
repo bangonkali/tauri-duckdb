@@ -106,12 +106,12 @@ jobs:
             "platforms;android-34" \
             "ndk;28.0.12674087"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
+          bun-version: latest
 
-      - name: Setup Node.js
+      - name: Setup Node.js LTS
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -135,11 +135,11 @@ jobs:
 
       - name: Install example app dependencies
         working-directory: examples/tauri-app
-        run: pnpm install
+        run: bun install
 
       - name: Build example app frontend
         working-directory: examples/tauri-app
-        run: pnpm run build
+        run: bun run build
 
       - name: Build Android APK (universal)
         working-directory: examples/tauri-app
@@ -147,7 +147,7 @@ jobs:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.12674087
         run: |
-          pnpm tauri android build --apk
+          bunx tauri android build --apk
 
       - name: Build Android AAB
         working-directory: examples/tauri-app
@@ -155,7 +155,7 @@ jobs:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.12674087
         run: |
-          pnpm tauri android build --aab
+          bunx tauri android build --aab
 
       - name: List build outputs
         run: |
