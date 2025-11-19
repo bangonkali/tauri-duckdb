@@ -1,6 +1,6 @@
 use tauri::{
-  plugin::{Builder, TauriPlugin},
-  Manager, Runtime,
+    plugin::{Builder, TauriPlugin},
+    Manager, Runtime,
 };
 
 pub use models::*;
@@ -23,26 +23,26 @@ use mobile::Duckdb;
 
 /// Extensions to [`tauri::App`], [`tauri::AppHandle`] and [`tauri::Window`] to access the duckdb APIs.
 pub trait DuckdbExt<R: Runtime> {
-  fn duckdb(&self) -> &Duckdb<R>;
+    fn duckdb(&self) -> &Duckdb<R>;
 }
 
 impl<R: Runtime, T: Manager<R>> crate::DuckdbExt<R> for T {
-  fn duckdb(&self) -> &Duckdb<R> {
-    self.state::<Duckdb<R>>().inner()
-  }
+    fn duckdb(&self) -> &Duckdb<R> {
+        self.state::<Duckdb<R>>().inner()
+    }
 }
 
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-  Builder::new("duckdb")
-    .invoke_handler(tauri::generate_handler![commands::ping])
-    .setup(|app, api| {
-      #[cfg(mobile)]
-      let duckdb = mobile::init(app, api)?;
-      #[cfg(desktop)]
-      let duckdb = desktop::init(app, api)?;
-      app.manage(duckdb);
-      Ok(())
-    })
-    .build()
+    Builder::new("duckdb")
+        .invoke_handler(tauri::generate_handler![commands::ping])
+        .setup(|app, api| {
+            #[cfg(mobile)]
+            let duckdb = mobile::init(app, api)?;
+            #[cfg(desktop)]
+            let duckdb = desktop::init(app, api)?;
+            app.manage(duckdb);
+            Ok(())
+        })
+        .build()
 }
