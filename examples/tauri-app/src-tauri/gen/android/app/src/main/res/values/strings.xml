@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DuckDB Demo</string>
+    <string name="main_activity_title">DuckDB Demo</string>
+</resources>

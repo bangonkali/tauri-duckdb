@@ -1,7 +1,7 @@
 {
-  "productName": "tauri-app",
+  "productName": "DuckDB Demo",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.duckdb.demo",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
@@ -18,7 +18,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "tauri-app",
+        "title": "DuckDB Demo",
         "width": 800
       }
     ]
@@ -32,6 +32,9 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "android": {
+      "minSdkVersion": 28
+    }
   }
 }
