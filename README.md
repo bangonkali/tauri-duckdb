@@ -20,51 +20,65 @@ The example app showcases the DuckDB plugin integration with a mobile-friendly U
 2. Install on your Android device (requires Android 9.0+ / API 28+)
 3. Open the app and test DuckDB functionality
 
-## 🛠️ Development Setup
+## 🛠️ Local Development Guide
 
-### Prerequisites
+Follow these instructions to set up a clean environment and build the project from scratch on macOS.
 
-1. **Install Rust** (if you haven't already)
-   ```sh
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   ```
+### 1. Prerequisites
 
-2. **Install Node.js LTS and Bun**
-   ```sh
-   curl -fsSL https://bun.sh/install | bash
-   ```
+1.  **Install Rust**
+    ```sh
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    ```
 
-3. **Install Android Studio and SDK**
-   - Download [Android Studio](https://developer.android.com/studio)
-   - Install Android SDK Platform 34
-   - Install NDK 28.0.12674087
+2.  **Install Bun (and Node.js)**
+    ```sh
+    curl -fsSL https://bun.sh/install | bash
+    ```
 
-4. **Setup Android environment variables**
-   ```sh
-   export ANDROID_HOME="$HOME/Library/Android/sdk"  # macOS
-   export ANDROID_HOME="$HOME/Android/Sdk"          # Linux
-   export NDK_HOME="$ANDROID_HOME/ndk/28.0.12674087"
-   ```
+3.  **Install Build Tools** (via Homebrew)
+    ```sh
+    brew install cmake ninja
+    ```
 
-### Building the Example App
+4.  **Install Android Studio**
+    - Open Android Studio -> SDK Manager.
+    - **SDK Platforms:** Check "Android 34".
+    - **SDK Tools:** Check "NDK (Side by side)" and install version `28.0.12674087`.
+    - Ensure `ANDROID_HOME` is set in your shell (usually `export ANDROID_HOME="$HOME/Library/Android/sdk"`).
 
+### 2. Build the Project
+
+**Step 1: Clone the repository**
 ```sh
-# Navigate to the example app
+git clone https://github.com/bangonkali/tauri-duckdb.git
+cd tauri-duckdb
+```
+
+**Step 2: Build Native DuckDB Libraries**
+Run the local build script. This handles `vcpkg` setup and compiles the C++ libraries for Android.
+```sh
+chmod +x scripts/ci/local-build-android.sh
+./scripts/ci/local-build-android.sh
+```
+*Note: This step can take 10-20 minutes as it compiles DuckDB from source.*
+
+**Step 3: Build the Demo App**
+```sh
 cd examples/tauri-app
-
-# Install dependencies
 bun install
-
-# Build the frontend
-bun build
-
-# Build Android APK and AAB
+bun tauri android init
 bun tauri android build
 ```
 
-The built files will be in:
-- APK: `src-tauri/gen/android/app/build/outputs/apk/`
-- AAB: `src-tauri/gen/android/app/build/outputs/bundle/`
+### 3. Run the App
+
+After the build completes, you can find the artifacts here:
+
+- **APK:** `examples/tauri-app/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk`
+- **AAB:** `examples/tauri-app/src-tauri/gen/android/app/build/outputs/bundle/universalDebug/app-universal-debug.aab`
+
+Drag and drop the APK onto an Android Emulator or install it on your device using `adb install <path-to-apk>`.
 
 ## 📦 Using in Your Project
 
@@ -108,9 +122,9 @@ cd your-app
 bun tauri android init
 ```
 
-## 🔧 Building DuckDB Libraries
+## 🔧 Building DuckDB Libraries (Manual / Advanced)
 
-The DuckDB native libraries are built automatically in CI/CD. If you need to build them locally:
+The `local-build-android.sh` script above automates this process. Only follow these steps if you need to customize the build manually.
 
 ### Android
 
