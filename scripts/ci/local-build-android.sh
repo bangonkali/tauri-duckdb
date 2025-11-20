@@ -94,4 +94,31 @@ chmod +x "$SCRIPT_DIR/build-android-duckdb.sh"
 # Run the build script
 "$SCRIPT_DIR/build-android-duckdb.sh"
 
-echo "Local Android build completed."
+echo "Local Android native libs build completed."
+
+# --- Build Example App ---
+
+echo "\n=== Building Example App ==="
+
+if ! command -v bun &> /dev/null; then
+    echo "Error: bun is not installed. Please install it (curl -fsSL https://bun.sh/install | bash)."
+    exit 1
+fi
+
+EXAMPLE_APP_DIR="$REPO_ROOT/examples/tauri-app"
+
+echo "Navigating to $EXAMPLE_APP_DIR"
+cd "$EXAMPLE_APP_DIR"
+
+echo "Installing dependencies..."
+bun install
+
+echo "Initializing Android project..."
+bun tauri android init
+
+echo "Building Android App (APK & AAB)..."
+bun tauri android build
+
+echo "\n=== Build Complete ==="
+echo "APK: $EXAMPLE_APP_DIR/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk"
+echo "AAB: $EXAMPLE_APP_DIR/src-tauri/gen/android/app/build/outputs/bundle/universalDebug/app-universal-debug.aab"
