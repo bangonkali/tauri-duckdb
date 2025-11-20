@@ -117,10 +117,10 @@ echo "Installing dependencies..."
 bun install
 
 echo "Initializing Android project..."
-bun run tauri android init
+bunx tauri android init
 
-echo "Building Android App (APK & AAB)..."
-bun run tauri android build
+echo "Building Android App APK and AAB..."
+bunx tauri android build
 
 echo "\n=== Build Complete ==="
 echo "APK: $EXAMPLE_APP_DIR/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk"
