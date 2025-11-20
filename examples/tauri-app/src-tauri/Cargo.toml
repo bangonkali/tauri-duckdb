@@ -19,5 +19,5 @@ tauri-build = { version = "2.5.1", default-features = false , features = [] }
 
 [dependencies]
 tauri = { version = "2.9.2", features = [] }
-tauri-plugin-duckdb = { path = "../../../" }
+# tauri-plugin-duckdb = { path = "../../../" }  # Commented out until Android native library is implemented
 

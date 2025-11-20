@@ -1,5 +1,6 @@
 <script>
-  import { ping } from 'tauri-plugin-duckdb-api'
+	// Plugin import commented out until Android native library is implemented
+  // import { ping } from 'tauri-plugin-duckdb-api'
 
 	let response = $state('')
 	let loading = $state(false)
@@ -20,7 +21,8 @@
 	async function testPing() {
 		loading = true
 		try {
-			const result = await ping("DuckDB Plugin is working!")
+			// Placeholder test until plugin is fully implemented
+			const result = { value: "Demo app is working! DuckDB plugin Android library coming soon..." }
 			updateResponse(result)
 		} catch (error) {
 			handleError(error)
