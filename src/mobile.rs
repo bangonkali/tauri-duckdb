@@ -30,4 +30,16 @@ impl<R: Runtime> Duckdb<R> {
             .run_mobile_plugin("ping", payload)
             .map_err(Into::into)
     }
+
+    pub fn execute(&self, payload: ExecuteRequest) -> crate::Result<ExecuteResponse> {
+        self.0
+            .run_mobile_plugin("execute", payload)
+            .map_err(Into::into)
+    }
+
+    pub fn query(&self, payload: QueryRequest) -> crate::Result<QueryResponse> {
+        self.0
+            .run_mobile_plugin("query", payload)
+            .map_err(Into::into)
+    }
 }

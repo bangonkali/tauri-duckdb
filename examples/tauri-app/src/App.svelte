@@ -1,8 +1,9 @@
 <script>
-  import { ping } from 'tauri-plugin-duckdb-api'
+  import { ping, execute, query } from 'tauri-plugin-duckdb-api'
 
 	let response = $state('')
 	let loading = $state(false)
+	let queryResults = $state([])
 
 	function updateResponse(returnValue) {
 		const timestamp = new Date().toLocaleTimeString()
@@ -21,7 +22,74 @@
 		loading = true
 		try {
 			const result = await ping({ value: "Hello from DuckDB plugin!" })
-			updateResponse(result)
+			updateResponse({ action: 'Ping Test', result })
+		} catch (error) {
+			handleError(error)
+		}
+	}
+
+	async function initializeDatabase() {
+		loading = true
+		try {
+			const result = await execute({ 
+				query: "CREATE TABLE users (id INTEGER, name VARCHAR, email VARCHAR)" 
+			})
+			updateResponse({ action: 'Create Table', result })
+		} catch (error) {
+			handleError(error)
+		}
+	}
+
+	async function insertSampleData() {
+		loading = true
+		try {
+			const users = [
+				{ id: 1, name: 'Alice Johnson', email: 'alice@example.com' },
+				{ id: 2, name: 'Bob Smith', email: 'bob@example.com' },
+				{ id: 3, name: 'Carol White', email: 'carol@example.com' }
+			]
+
+			for (const user of users) {
+				await execute({ 
+					query: `INSERT INTO users VALUES (${user.id}, '${user.name}', '${user.email}')` 
+				})
+			}
+
+			updateResponse({ action: 'Insert Data', result: { success: true, count: users.length } })
+		} catch (error) {
+			handleError(error)
+		}
+	}
+
+	async function queryAllUsers() {
+		loading = true
+		try {
+			const result = await query({ query: "SELECT * FROM users" })
+			queryResults = result.data || []
+			updateResponse({ action: 'Query Users', result, rowCount: queryResults.length })
+		} catch (error) {
+			handleError(error)
+		}
+	}
+
+	async function runFullDemo() {
+		loading = true
+		try {
+			// Step 1: Create table
+			updateResponse({ step: 1, action: 'Creating table...' })
+			await initializeDatabase()
+			await new Promise(resolve => setTimeout(resolve, 500))
+
+			// Step 2: Insert data
+			updateResponse({ step: 2, action: 'Inserting sample data...' })
+			await insertSampleData()
+			await new Promise(resolve => setTimeout(resolve, 500))
+
+			// Step 3: Query data
+			updateResponse({ step: 3, action: 'Querying all users...' })
+			await queryAllUsers()
+
+			updateResponse({ status: 'Complete', message: '✅ Full demo completed successfully!' })
 		} catch (error) {
 			handleError(error)
 		}
@@ -29,6 +97,7 @@
 
 	function clearLog() {
 		response = ''
+		queryResults = []
 	}
 </script>
 
@@ -39,16 +108,61 @@
   </div>
 
   <div class="demo-section">
-    <h2>Plugin Test</h2>
+    <h2>🚀 Quick Demo</h2>
+    <div class="button-group">
+      <button class="demo-btn" onclick={runFullDemo} disabled={loading}>
+        {loading ? '⏳ Running...' : '▶️ Run Full Demo'}
+      </button>
+    </div>
+    <p class="demo-desc">Creates table, inserts data, and queries results</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>📋 Manual Operations</h2>
     <div class="button-group">
       <button class="primary-btn" onclick={testPing} disabled={loading}>
-        {loading ? '⏳ Loading...' : '🔌 Test Connection'}
+        🔌 Test Connection
+      </button>
+      <button class="primary-btn" onclick={initializeDatabase} disabled={loading}>
+        🗄️ Create Table
+      </button>
+      <button class="primary-btn" onclick={insertSampleData} disabled={loading}>
+        ➕ Insert Data
+      </button>
+      <button class="primary-btn" onclick={queryAllUsers} disabled={loading}>
+        🔍 Query Users
       </button>
       <button class="secondary-btn" onclick={clearLog}>
         🗑️ Clear Log
       </button>
     </div>
   </div>
+
+  {#if queryResults.length > 0}
+  <div class="results-section">
+    <h3>📊 Query Results ({queryResults.length} rows)</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each queryResults as row}
+          <tr>
+            <td>{row.id}</td>
+            <td>{row.name}</td>
+            <td>{row.email}</td>
+          </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {/if}
 
   <div class="log-section">
     <h3>Event Log</h3>
@@ -155,6 +269,79 @@
     background: #da190b;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .demo-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    width: 100%;
+  }
+
+  .demo-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .demo-desc {
+    text-align: center;
+    margin-top: 0.5rem;
+    opacity: 0.9;
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+
+  .results-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .results-section h3 {
+    margin-top: 0;
+    font-size: 1.3rem;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+  }
+
+  thead {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  th, td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  th {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    font-size: 0.95rem;
+  }
+
+  tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
   }
 
   .log-section {
