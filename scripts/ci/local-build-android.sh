@@ -1,9 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 set -euo pipefail
 
 # Get the directory of this script
-SCRIPT_DIR=${0:a:h}
-REPO_ROOT=${SCRIPT_DIR:h:h}
+# Resolve the absolute path of the script directory, handling symlinks if necessary
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # --- Configuration ---
 # Match versions from .github/workflows/android-duckdb.yml where possible
@@ -114,10 +115,10 @@ echo "Installing dependencies..."
 bun install
 
 echo "Initializing Android project..."
-bun tauri android init
+bun run tauri android init
 
 echo "Building Android App (APK & AAB)..."
-bun tauri android build
+bun run tauri android build
 
 echo "\n=== Build Complete ==="
 echo "APK: $EXAMPLE_APP_DIR/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk"
