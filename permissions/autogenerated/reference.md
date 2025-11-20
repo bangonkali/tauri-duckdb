@@ -18,6 +18,32 @@ Default permissions for the plugin
 <tr>
 <td>
 
+`duckdb:allow-execute`
+
+</td>
+<td>
+
+Enables the execute command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`duckdb:deny-execute`
+
+</td>
+<td>
+
+Denies the execute command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `duckdb:allow-ping`
 
 </td>
@@ -37,6 +63,32 @@ Enables the ping command without any pre-configured scope.
 <td>
 
 Denies the ping command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`duckdb:allow-query`
+
+</td>
+<td>
+
+Enables the query command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`duckdb:deny-query`
+
+</td>
+<td>
+
+Denies the query command without any pre-configured scope.
 
 </td>
 </tr>

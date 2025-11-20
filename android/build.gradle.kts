@@ -24,5 +24,5 @@ android {
 dependencies {
     implementation("androidx.webkit:webkit:1.6.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    compileOnly("app.tauri:tauri-android:2.0.0")
+    compileOnly("app.tauri:tauri-android:2.9.2")
 }
