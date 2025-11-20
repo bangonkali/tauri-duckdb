@@ -147,6 +147,11 @@ jobs:
         working-directory: examples/tauri-app
         run: bun run build
 
+      - name: Initialize Android project
+        working-directory: examples/tauri-app
+        run: |
+          bunx tauri android init
+
       - name: Build Android APK and AAB
         working-directory: examples/tauri-app
         env:
