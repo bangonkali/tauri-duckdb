@@ -166,6 +166,7 @@ jobs:
   build-android-app:
     name: Build Android Demo App
     needs: build-duckdb-android
+    if: ${{ false }} # temporarily disabled until plugin publishing stabilizes
     runs-on: ubuntu-24.04
     permissions:
       contents: read
