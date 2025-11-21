@@ -1,4 +1,4 @@
-package DuckdbPlugin
+package com.github.bangonkali.tauri.duckdb
 
 import android.app.Activity
 import android.content.Context
