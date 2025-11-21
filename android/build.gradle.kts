@@ -15,12 +15,6 @@ val pluginVersion = providers.gradleProperty("pluginVersion")
 group = "com.github.bangonkali"
 version = pluginVersion.get()
 
-repositories {
-    google()
-    mavenCentral()
-    maven("https://jitpack.io")
-}
-
 android {
     namespace = "DuckdbPlugin"
     compileSdk = 34
