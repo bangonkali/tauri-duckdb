@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    tags:
+      - 'v*'
     paths:
       - 'third_party/duckdb/**'
       - 'scripts/ci/**'
@@ -70,6 +72,96 @@ jobs:
           name: duckdb-android-libs
           path: android/src/main/jniLibs
           retention-days: 7
+
+  publish-android-plugin:
+    name: Publish Android Plugin Snapshot
+    needs: build-duckdb-android
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager --install \
+            "platform-tools" \
+            "build-tools;35.0.0" \
+            "platforms;android-34"
+
+      - name: Download DuckDB Android libraries
+        uses: actions/download-artifact@v4
+        with:
+          name: duckdb-android-libs
+          path: android/src/main/jniLibs
+
+      - name: Compute release metadata
+        id: release_meta
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION="${GITHUB_REF_NAME}-SNAPSHOT"
+          fi
+          echo "release_version=$VERSION" >> "$GITHUB_OUTPUT"
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "jitpack_version=$VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "jitpack_version=${GITHUB_REF_NAME}-SNAPSHOT" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Android plugin AAR and Maven metadata
+        working-directory: android
+        env:
+          PLUGIN_VERSION: ${{ steps.release_meta.outputs.release_version }}
+        run: |
+          ./gradlew --stacktrace --warning-mode all clean assembleRelease publishReleasePublicationToMavenLocal
+
+      - name: Stage release artifacts
+        id: stage
+        run: |
+          VERSION="${{ steps.release_meta.outputs.release_version }}"
+          ARTIFACT_DIR="release-artifacts/$VERSION"
+          mkdir -p "$ARTIFACT_DIR"
+          cp android/build/outputs/aar/android-release.aar "$ARTIFACT_DIR/duckdb-plugin-$VERSION.aar"
+          tar -czf "$ARTIFACT_DIR/jniLibs-$VERSION.tar.gz" -C android/src/main jniLibs
+          cp -R android/build/publications/release "$ARTIFACT_DIR/maven"
+          echo "artifact_dir=$ARTIFACT_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: duckdb-android-plugin-${{ steps.release_meta.outputs.release_version }}
+          path: ${{ steps.stage.outputs.artifact_dir }}
+          retention-days: 30
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-artifacts/${{ steps.release_meta.outputs.release_version }}/duckdb-plugin-${{ steps.release_meta.outputs.release_version }}.aar
+            release-artifacts/${{ steps.release_meta.outputs.release_version }}/jniLibs-${{ steps.release_meta.outputs.release_version }}.tar.gz
+
+      - name: Trigger JitPack build cache
+        env:
+          JITPACK_VERSION: ${{ steps.release_meta.outputs.jitpack_version }}
+        run: |
+          curl -fsSL -X POST "https://jitpack.io/com/github/bangonkali/tauri-duckdb/${JITPACK_VERSION}/build.log" || true
 
   build-android-app:
     name: Build Android Demo App

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DUCKDB_EXTENSIONS="icu;json;parquet;vss;sqlite_scanner;spatial"
+export DUCKDB_EXTENSIONS="icu;json;parquet;vss;sqlite_scanner;spatial"
 
 # Get the directory of this script
 # Resolve the absolute path of the script directory, handling symlinks if necessary
