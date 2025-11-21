@@ -194,6 +194,14 @@ const response = await ping("Test message")
 - [ ] AppData storage integration
 - [ ] Documentation and examples
 
+## ⚠️ Gotchas & Troubleshooting
+
+- **Gradle/AGP pairing:** The Android project uses AGP `8.5.2`, so the Gradle wrapper is pinned to `8.9`. Mixing this AGP release with newer Gradle versions (e.g., `8.14.x`) fails with `isCrunchPngs`/Groovy bean errors. If you need a newer Gradle, upgrade AGP in `android/build.gradle.kts` at the same time.
+- **JNI libs must exist before publishing:** Both `./scripts/ci/build-android-duckdb.sh` and the `build-duckdb-android` GitHub job populate `android/src/main/jniLibs`. Publishing or consuming the plugin without these binaries yields empty AARs, so always run the script (or use the CI artifacts) before building the Gradle module.
+- **Gradle wrapper integrity:** The repository includes a standalone `android/gradlew`. Editing it manually can introduce shell quoting issues (e.g., the `sed` command) that break CI. Replace it with the upstream wrapper script whenever you bump Gradle instead of tweaking individual lines.
+- **Workflow order matters:** The `publish-android-plugin` job assumes the DuckDB artifacts job completed successfully. If you trigger the workflow manually, make sure both jobs run (or download/upload the `jniLibs` artifact yourself) before expecting JitPack to have a usable snapshot.
+- **JitPack version strings:** The published Maven coordinates follow `com.github.bangonkali:duckdb-plugin:<branch>-SNAPSHOT` for branches and `...:vX.Y.Z` for tags. Consumers must wait for the GitHub Action to finish and for the `curl https://jitpack.io/.../build.log` step to succeed before the dependency resolves.
+
 ## 📄 License
 
 This project is licensed under the MIT License.
